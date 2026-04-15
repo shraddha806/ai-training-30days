@@ -1,0 +1,4 @@
+Machine Learning (ML) is a branch of AI where systems learn patterns from data to make predictions or decisions without being explicitly programmed for every rule, powering things like recommendations, fraud detection, and forecasting. 
+Large Language Models (LLMs) are advanced ML models trained on massive text datasets to understand and generate human-like language, enabling chatbots, coding assistants, summarization, and content creation. 
+Retrieval-Augmented Generation (RAG) improves LLMs by connecting them to external knowledge sources such as databases or documents, so they can retrieve relevant information first and then generate more accurate, up-to-date, and context-aware responses. 
+Agentic AI goes a step further by giving AI systems the ability to plan, reason, use tools, take actions, and work through multi-step goals autonomously, making them useful for complex workflows like research, automation, customer support, and business operations.
