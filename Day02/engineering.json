@@ -1,0 +1,12 @@
+[
+    {
+        "name": "Shraddha",
+        "department": "Engineering",
+        "salary": 90000
+    },
+    {
+        "name": "Naresh",
+        "department": "Engineering",
+        "salary": 75000
+    }
+]
