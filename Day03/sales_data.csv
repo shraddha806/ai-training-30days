@@ -1,0 +1,23 @@
+order_id,product,category,quantity,price,revenue,region,order_date
+1001,Laptop,Electronics,2,45000,90000,North,2025-01-15
+1002,Headphones,Electronics,5,2500,12500,South,2025-01-20
+1003,Desk Chair,Furniture,1,15000,,West,2025-02-10
+1004,Laptop,Electronics,1,45000,45000,North,2025-02-14
+1005,Notebook,Stationery,100,50,5000,,2025-03-01
+1006,Monitor,Electronics,3,18000,54000,East,2025-03-10
+1007,Desk Chair,Furniture,2,15000,30000,North,2025-03-15
+1008,Pen Set,Stationery,50,200,10000,South,2025-04-01
+1009,Laptop,Electronics,1,45000,45000,West,2025-04-10
+1010,Headphones,Electronics,3,2500,7500,North,2025-05-05
+1011,Keyboard,Electronics,10,1500,15000,South,2025-05-12
+1012,Desk Lamp,Furniture,5,3000,,East,2025-06-01
+1013,Laptop,Electronics,2,45000,90000,North,2025-06-15
+1014,Monitor,Electronics,1,18000,18000,,2025-07-01
+1015,Notebook,Stationery,200,50,10000,West,2025-07-20
+1016,Headphones,Electronics,5,2500,12500,South,2025-07-20
+1017,Desk Chair,Furniture,1,15000,15000,North,2025-08-10
+1018,Pen Set,Stationery,,200,10000,East,2025-09-01
+1019,Laptop,Electronics,1,45000,45000,North,2025-09-15
+1020,Monitor,Electronics,2,18000,36000,South,2025-10-01
+1001,Laptop,Electronics,2,45000,90000,North,2025-01-15
+1016,Headphones,Electronics,5,2500,12500,South,2025-07-20
