@@ -1,0 +1,51 @@
+{
+    "location": {
+        "name": "Bangalore",
+        "region": "Karnataka",
+        "country": "India",
+        "lat": 12.9833,
+        "lon": 77.5833,
+        "tz_id": "Asia/Kolkata",
+        "localtime_epoch": 1776682742,
+        "localtime": "2026-04-20 16:29"
+    },
+    "current": {
+        "last_updated_epoch": 1776681900,
+        "last_updated": "2026-04-20 16:15",
+        "temp_c": 35.3,
+        "temp_f": 95.5,
+        "is_day": 1,
+        "condition": {
+            "text": "Partly cloudy",
+            "icon": "//cdn.weatherapi.com/weather/64x64/day/116.png",
+            "code": 1003
+        },
+        "wind_mph": 9.2,
+        "wind_kph": 14.8,
+        "wind_degree": 100,
+        "wind_dir": "E",
+        "pressure_mb": 1010.0,
+        "pressure_in": 29.83,
+        "precip_mm": 0.0,
+        "precip_in": 0.0,
+        "humidity": 28,
+        "cloud": 50,
+        "feelslike_c": 33.5,
+        "feelslike_f": 92.4,
+        "windchill_c": 36.5,
+        "windchill_f": 97.7,
+        "heatindex_c": 35.1,
+        "heatindex_f": 95.1,
+        "dewpoint_c": 6.6,
+        "dewpoint_f": 43.8,
+        "vis_km": 8.0,
+        "vis_miles": 4.0,
+        "uv": 1.7,
+        "gust_mph": 10.6,
+        "gust_kph": 17.0,
+        "short_rad": 833.02,
+        "diff_rad": 96.41,
+        "dni": 739.14,
+        "gti": 811.24
+    }
+}
