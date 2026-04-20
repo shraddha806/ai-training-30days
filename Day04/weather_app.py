@@ -1,11 +1,13 @@
-# This is the assignment which I should complete - Write a function that takes a city name and returns weather data from a public API. Save response to JSON. Handle API errors gracefully.
+#This is the assignment which I should complete - Write a function that takes a city name and returns weather data from a public API. Save response to JSON. Handle API errors gracefully.
 import requests
 import json
 
-# this is the weather API key which I got from the website and I will use it to get the weather data for the city which I will input
+
+#this the the waether api key which I got from the website and I will use it to get the weather data for the city which I will input
 API_KEY = "29c4dcbfdd9547ef828102115262004"
 
-# this is the url which I will use to get the weather data for the city which I will input
+
+#this is the url which I will use to get the weather data for the city which I will input
 def get_weather(city):
     city = city.strip()
     if not city:
@@ -40,16 +42,10 @@ def get_weather(city):
     except requests.exceptions.RequestException as e:
         print("Network Error:", e)
 
-    return None
+city = input("Enter city name: ==========================================")
+result = get_weather(city)
 
-
-if __name__ == "__main__":
-    city = input("Enter city name: ")
-    result = get_weather(city)
-
-    if result:
-        print("City:", result["location"]["name"])
-        print("Temperature:", result["current"]["temp_c"], "°C")
-        print("Weather:", result["current"]["condition"]["text"])
-    else:
-        print("No weather data returned. Try a different spelling, for example: Bangalore or Bengaluru.")
+if result:
+    print("City:", result["location"]["name"])
+    print("Temperature:", result["current"]["temp_c"], "°C")
+    print("Weather:", result["current"]["condition"]["text"])
