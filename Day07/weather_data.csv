@@ -1,0 +1,6 @@
+City,Region,Country,Temperature_C,FeelsLike_C,Humidity,Wind_kph,Condition
+Bengaluru,Karnataka,India,33.4,31.3,30,13.7,Sunny
+Mumbai,Maharashtra,India,34.1,40.6,60,24.5,Overcast
+Delhi,Ontario,Canada,5.2,2.5,82,11.9,Clear
+Hyderabad,Telangana,India,37.3,36.1,26,5.4,Sunny
+Chennai,Tamil Nadu,India,35.0,42.7,56,25.6,Sunny
