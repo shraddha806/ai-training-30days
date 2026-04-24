@@ -7,8 +7,9 @@ cities = ["Bengaluru", "Mumbai", "Delhi", "Hyderabad", "Chennai"]
 
 weather_list = []
 
+#provider of weather data"
 for city in cities:
-    url = f"http://api.weatherapi.com/v1/current.json?key={API_KEY}&q={city}"
+    url = f"http://api.weatherapi.com/v1/current.json?key={API_KEY}&q={city}" 
 
     try:
         response = requests.get(url, timeout=10)
@@ -42,7 +43,6 @@ df.to_csv("weather_data.csv", index=False)
 
 print(df)
 print("CSV saved successfully!")
-
 
 print("\n--- ANALYSIS ---")
 
