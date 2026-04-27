@@ -52,3 +52,8 @@ This was the best response because it included format, examples, use cases, and 
 # Final Conclusion
 
 Prompt 3 gave the best output because it provided clear instructions, expected format, and target audience. More detailed prompts usually produce better responses.
+
+
+
+
+
