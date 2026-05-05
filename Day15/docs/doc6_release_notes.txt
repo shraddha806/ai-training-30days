@@ -1,0 +1,10 @@
+Release Notes
+
+Version 2.0
+- Added collaboration workspace support.
+- Improved search relevance and document indexing.
+- Updated the privacy policy and security controls.
+
+Version 1.5
+- Added new FAQ entries.
+- Fixed installation flow issues on Windows.

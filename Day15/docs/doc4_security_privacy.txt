@@ -1,0 +1,12 @@
+Security and Privacy
+
+Data security is enforced via encryption in transit and at rest. User data is stored in secure, monitored systems.
+
+Privacy practice:
+- The company does not sell user data.
+- Only authorized personnel may access sensitive information.
+- Users may request data deletion following the privacy policy.
+
+Access control:
+- Multi-factor authentication is recommended.
+- Passwords must be changed every 90 days.

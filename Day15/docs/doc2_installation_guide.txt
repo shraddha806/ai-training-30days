@@ -1,0 +1,10 @@
+Installation Guide
+
+Step 1: Download the installer from the official website.
+Step 2: Run the installer and accept the license agreement.
+Step 3: Choose the installation directory and click Install.
+Step 4: When the process completes, launch the application from the Start menu.
+
+Notes:
+- Ensure the system meets the minimum requirements.
+- If a security warning appears, allow access for the installer.

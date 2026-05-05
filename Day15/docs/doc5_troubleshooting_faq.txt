@@ -1,0 +1,10 @@
+Troubleshooting FAQ
+
+Q: The app crashes when I open it. What should I do?
+A: Restart your device, check for updates, and reinstall the application if the issue persists.
+
+Q: I forgot my password. How can I reset it?
+A: Use the password reset link on the sign-in page and follow the emailed instructions.
+
+Q: Why is the app asking for permission to access files?
+A: The app needs access to read and save documents. Grant permission and retry.

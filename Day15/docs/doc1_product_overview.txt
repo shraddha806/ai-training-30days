@@ -1,0 +1,7 @@
+Product Assistant is a document-centric help system designed to provide quick, accurate responses from a corpus of company knowledge. It supports installation guidance, pricing details, security policy references, troubleshooting steps, and release notes.
+
+Features:
+- Guided setup for first-time users
+- Built-in privacy and data-handling descriptions
+- Role-based access to support content
+- Ability to answer common operational questions from documents
