@@ -145,7 +145,7 @@ def generate_answer(query, retrieved_chunks):
                 ],
                 temperature=0.2,
             )
-            answer = response.choices[0].message.content.strip()
+      How do I reset my password?      answer = response.choices[0].message.content.strip()
         except (AttributeError, TypeError) as e:
             answer = f"Error generating answer (Groq API issue): {e}"
         except Exception as e:
@@ -174,7 +174,6 @@ TEST_QUESTIONS = [
     "What should I do if the app crashes on startup?",
     "Which features are new in version 2.0?",
     "Can I use the product offline?",
-    "How do I reset my password?",
     "What are the security requirements for users?",
     "Does the product support team collaboration?",
     "What is the warranty period for hardware?",

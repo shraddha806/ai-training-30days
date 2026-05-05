@@ -8,7 +8,7 @@ Build a working Retrieval-Augmented Generation (RAG) prototype over 5+ documents
 - a working prototype, quality report, and demo plan for tomorrow
 
 ## Files
-- `day15_document_assistant.py` — main prototype
+- `Doc_assistance.py` — main prototype
 - `requirements.txt` — Python dependencies
 - `docs/` — 6 source documents for retrieval
 - `quality_report.md` — test results, question quality scores, and evaluation notes
@@ -31,8 +31,15 @@ GROQ_API_KEY=your_api_key_here
 ## Run the prototype
 
 ```bash
-python day15_document_assistant.py --index
-python day15_document_assistant.py
+python Doc_assistance.py --index
+python Doc_assistance.py
+```
+
+### Optional commands
+
+```bash
+python Doc_assistance.py --test
+python Doc_assistance.py --query "How does the product handle data privacy?"
 ```
 
 ## Demo checklist
