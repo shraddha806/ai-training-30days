@@ -1,0 +1,46 @@
+Architecture Diagram (Day16)
+
+        ┌──────────┐
+        │   User   │
+        └────┬─────┘
+             │
+             ▼
+    ┌──────────────────┐
+    │ Frontend (UI)    │
+    │ Web / Postman    │
+    └────┬─────────────┘
+         │ HTTP Request
+         ▼
+   ┌───────────────────┐
+   │ API Layer         │
+   │ FastAPI (/chat)   │
+   └────┬──────────────┘
+        │
+        ▼
+┌─────────────────────────────┐
+│ Python AI Backend Service   │
+│ Prompting + Orchestration   │
+└────┬───────────────────┬────┘
+     │                   │
+     │ (optional RAG)    │ similarity search
+     ▼                   ▼
+┌──────────────┐   ┌──────────────────┐
+│ LLM (Groq)   │   │ Vector DB        │
+│ llama-3.1... │   │ embeddings index │
+└────┬─────────┘   └────┬─────────────┘
+     │                  │ metadata + chunks
+     │ final response   ▼
+     │           ┌──────────────────┐
+     └──────────▶│ PostgreSQL       │
+                 │ source records   │
+                 └──────────────────┘
+
+Flow Explanation:
+1) The user sends a message from the Frontend (or Postman for testing).
+2) Frontend calls FastAPI endpoint: POST /chat.
+3) API forwards input to Python AI backend.
+4) AI backend calls the LLM to generate the response.
+5) If RAG is enabled, backend also queries Vector DB for relevant context.
+6) Vector DB maps similar embeddings and uses PostgreSQL-backed records/chunks.
+7) Backend combines retrieved context + user prompt, then asks LLM for grounded output.
+8) Final AI response is returned through FastAPI to Frontend/User.

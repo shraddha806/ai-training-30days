@@ -1,0 +1,43 @@
+# Day16 - FastAPI + AI Backend + Architecture
+
+This task implements a basic AI chat API using FastAPI and Groq LLM, with architecture documentation that includes:
+User -> Frontend -> API -> Python AI Backend -> LLM -> Vector DB -> PostgreSQL
+
+## 1) FastAPI Endpoint
+
+Endpoint implemented in `main.py`:
+- `POST /chat`
+- Input JSON:
+  `{"message": "your question"}`
+- Output JSON:
+  `{"user_message": "...", "ai_response": "..."}`
+
+Run command:
+`uvicorn main:app --reload`
+
+API docs:
+`http://127.0.0.1:8000/docs`
+
+## 2) Postman Test
+
+Create request in Postman:
+- Method: `POST`
+- URL: `http://127.0.0.1:8000/chat`
+- Header: `Content-Type: application/json`
+- Body (raw JSON):
+  `{"message":"Explain AI architecture in simple words"}`
+
+Expected response:
+```
+{
+  "user_message": "Explain AI architecture in simple words",
+  "ai_response": "..."
+}
+```
+
+## 3) Complete Architecture + Flow
+
+Architecture diagram and detailed flow steps are documented in:
+- `architecture.txt`
+
+That file explains how request travels from User to Frontend, API, AI backend, LLM, Vector DB, and PostgreSQL, and then returns back to the user.
