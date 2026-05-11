@@ -1,0 +1,4 @@
+# Semantic Kernel + OpenAI connector (heavy dependency set vs requirements.txt)
+# Install: python -m pip install -r requirements-semantic-kernel.txt
+semantic-kernel>=1.17.0
+python-dotenv>=1.0.0
