@@ -1,0 +1,273 @@
+# =============================================================================
+# RAG APPLICATION — CI/CD PIPELINE (PSEUDO-YAML)
+# =============================================================================
+# Purpose: Teaching / design artifact. Syntax is "GitHub Actions–like" but uses
+#   pseudo-steps and comments so you can port the *ideas* to GitLab, Azure
+#   DevOps, Jenkins, CircleCI, etc.
+#
+# Replace ${{ secrets.* }} / ${{ vars.* }} with your platform's secret store.
+# =============================================================================
+
+meta:
+  name: rag-hr-assistant-pipeline
+  description: >
+    Continuous integration and delivery for an internal RAG (retrieval-augmented
+    generation) service: API + worker + vector store + document ingestion.
+  # When mapping to real CI: pin runner OS, concurrency groups, and cancel-in-progress.
+  concurrency:
+    group: rag-${{ ref_name }}
+    cancel_in_progress: true
+
+# -----------------------------------------------------------------------------
+# TRIGGERS — when the pipeline runs
+# -----------------------------------------------------------------------------
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      # Only run expensive RAG jobs when relevant paths change
+      - "src/**"
+      - "ingestion/**"
+      - "eval/**"
+      - "config/**"
+      - "docker/**"
+      - ".pseudo-ci/**" # rename to .github/workflows in real life
+
+  push:
+    branches: [main]
+    paths: ["src/**", "ingestion/**", "eval/**", "config/**", "docker/**"]
+
+  # Nightly: catch embedding API drift, broken chunkers, stale golden sets
+  schedule:
+    - cron: "0 6 * * *" # 06:00 UTC daily
+
+  workflow_dispatch:
+    inputs:
+      deploy_target:
+        description: "staging | production (requires approval in real setup)"
+        default: "staging"
+
+# -----------------------------------------------------------------------------
+# GLOBAL DEFAULTS
+# -----------------------------------------------------------------------------
+defaults:
+  timeout_minutes: 45
+  # RAG jobs are I/O and GPU heavy — use larger runners or self-hosted in prod
+  runner: ubuntu-latest
+
+# -----------------------------------------------------------------------------
+# SECRETS (document only — never commit real values)
+# -----------------------------------------------------------------------------
+# Required in your secret manager:
+#   OPENAI_API_KEY or AZURE_OPENAI_* / EMBEDDING_ENDPOINT
+#   VECTOR_DB_URL + VECTOR_DB_API_KEY (e.g. pgvector, Pinecone, Weaviate)
+#   DOCKER_REGISTRY_USER / DOCKER_REGISTRY_TOKEN
+#   STAGING_SMOKE_URL — base URL for post-deploy health + one retrieval query
+# -----------------------------------------------------------------------------
+
+jobs:
+
+  # ===========================================================================
+  # JOB 1 — Fast feedback (every PR)
+  # ===========================================================================
+  lint_and_unit:
+    stage: validate
+    steps:
+      - checkout: { depth: 1 }
+
+      - name: Install Python + Node (if UI exists)
+        run: |
+          # Pseudo: cache pip/npm between runs
+          pip install -r requirements-dev.txt
+
+      - name: Lint (ruff / black / eslint as applicable)
+        run: |
+          # Catches style + obvious bugs before any API spend
+          ruff check .
+          black --check .
+
+      - name: Typecheck
+        run: mypy src/
+
+      - name: Unit tests (no live LLM — mock embeddings)
+        run: pytest tests/unit -q --cov=src --cov-report=xml
+        # Comment: unit tests MUST NOT call paid APIs; use fixtures + vcr
+
+      - name: Upload coverage (optional)
+        run: echo "Upload coverage.xml to your quality gate"
+
+  # ===========================================================================
+  # JOB 2 — Contract / schema tests for API + ingestion payloads
+  # ===========================================================================
+  contract_tests:
+    stage: validate
+    needs: [lint_and_unit]
+    steps:
+      - checkout: { depth: 1 }
+
+      - name: Validate OpenAPI / JSON Schemas
+        run: |
+          # Ensures chunk metadata, citation fields, and error envelopes stay stable
+          schemathesis run openapi.yaml --checks=all --hypothesis-max-examples=50
+        # Comment: contract tests protect RAG clients (chat UI, MCP tools) from silent breaks
+
+  # ===========================================================================
+  # JOB 3 — RAG-specific: chunking & embedding invariants (PR + main)
+  # ===========================================================================
+  rag_ingestion_sanity:
+    stage: rag_quality
+    needs: [lint_and_unit]
+    steps:
+      - checkout: { depth: 1 }
+
+      - name: Dry-run chunker on golden fixture docs
+        run: |
+          # Uses small checked-in PDFs/MD — verifies token windows, overlap, metadata
+          python -m ingestion.cli --dry-run --input fixtures/policies/
+        env:
+          CHUNK_SIZE: "512"
+          CHUNK_OVERLAP: "64"
+
+      - name: Assert embedding dimension matches vector collection config
+        run: |
+          # Prevents deploying model A (1536-d) against index built with model B (3072-d)
+          python eval/assert_embedding_dim.py --config config/vector.yaml
+
+      - name: Forbidden PII regex scan on fixture outputs
+        run: |
+          # Blocks national IDs, raw credit cards in chunked text (policy compliance)
+          python eval/scan_pii_patterns.py --path artifacts/chunks/
+
+  # ===========================================================================
+  # JOB 4 — Retrieval evaluation (golden questions; small budget)
+  # ===========================================================================
+  retrieval_eval:
+    stage: rag_quality
+    needs: [rag_ingestion_sanity]
+    # Comment: skip on draft PRs in real CI to save cost
+    if: "pull_request.draft == false"
+    steps:
+      - checkout: { depth: 1 }
+
+      - name: Load golden eval set (versioned JSONL in repo)
+        run: cp eval/golden_v3.jsonl $WORKSPACE/
+
+      - name: Point to ephemeral vector namespace OR read-only staging index
+        env:
+          VECTOR_NAMESPACE: "ci-${{ run_id }}"
+          # Secrets from vault — never echo
+          VECTOR_DB_URL: ${{ secrets.VECTOR_DB_URL_STAGING }}
+
+      - name: Upsert fixture embeddings into ephemeral namespace
+        run: python eval/ci_seed_index.py --namespace $VECTOR_NAMESPACE
+
+      - name: Run retrieval metrics (MRR@k, hit@k, citation presence)
+        run: |
+          python eval/run_retrieval_eval.py \
+            --golden eval/golden_v3.jsonl \
+            --min_mrr 0.72 \
+            --min_citation_rate 0.90
+        # Comment: fail pipeline if retrieval regresses vs baseline stored in eval/baseline.json
+
+      - name: Tear down ephemeral namespace
+        if: always()
+        run: python eval/ci_drop_namespace.py --namespace $VECTOR_NAMESPACE
+
+  # ===========================================================================
+  # JOB 5 — Build & scan container images
+  # ===========================================================================
+  build_images:
+    stage: build
+    needs: [contract_tests, retrieval_eval]
+    steps:
+      - checkout: { depth: 1 }
+
+      - name: Build API image
+        run: docker build -t rag-api:${{ git_sha }} -f docker/Dockerfile.api .
+
+      - name: Build worker image (async ingestion)
+        run: docker build -t rag-worker:${{ git_sha }} -f docker/Dockerfile.worker .
+
+      - name: Scan images for CVEs (Trivy / Grype)
+        run: |
+          # Block deploy on critical CVEs in base images
+          trivy image --severity HIGH,CRITICAL --exit-code 1 rag-api:${{ git_sha }}
+
+      - name: Push to registry (only on main + tags)
+        if: "branch == 'main'"
+        run: |
+          echo "$REGISTRY_TOKEN" | docker login registry.internal -u "$REGISTRY_USER" --password-stdin
+          docker push rag-api:${{ git_sha }}
+
+  # ===========================================================================
+  # JOB 6 — Deploy to STAGING (automatic from main)
+  # ===========================================================================
+  deploy_staging:
+    stage: deploy
+    needs: [build_images]
+    if: "branch == 'main'"
+    environment:
+      name: staging
+      url: https://rag-staging.internal.example.com
+    steps:
+      - name: Apply Kubernetes manifests / Terraform (pseudo)
+        run: |
+          # Rolling update; readiness probes on /health and /ready (DB + vector reachable)
+          kubectl set image deployment/rag-api api=registry.internal/rag-api:${{ git_sha }} -n rag-staging
+
+      - name: Run DB migrations (if any)
+        run: alembic upgrade head
+        # Comment: vector schema migrations are sensitive — often separate job + backup
+
+      - name: Post-deploy smoke — HTTP + one grounded query
+        run: |
+          curl -sf "${STAGING_SMOKE_URL}/health"
+          python eval/smoke_ask.py --url "${STAGING_SMOKE_URL}" --question "What is the leave carry-forward policy?" --expect_citations true
+        env:
+          STAGING_SMOKE_URL: ${{ secrets.STAGING_SMOKE_URL }}
+
+  # ===========================================================================
+  # JOB 7 — PRODUCTION (manual approval + tag only; pattern)
+  # ===========================================================================
+  deploy_production:
+    stage: deploy
+    needs: [deploy_staging]
+    if: "startsWith(ref, 'refs/tags/v')"
+    environment:
+      name: production
+      # Real platforms: required_reviewers, wait_timer, protection rules
+    steps:
+      - name: Manual approval gate (human)
+        # GitHub: environment protection; GitLab: manual job; Azure: approval gates
+        manual_approval: true
+
+      - name: Blue-green or canary deploy (pseudo)
+        run: |
+          # Shift 5% traffic → run automated probes → full promote
+          ./scripts/canary_release.sh ${{ git_tag }}
+
+      - name: Synthetic monitor ping (post-prod)
+        run: |
+          curl -sf "${PROD_HEALTH_URL}/health"
+
+      - name: Rollback hook on failure
+        if: failure()
+        run: ./scripts/rollback_last_release.sh
+
+# =============================================================================
+# OPTIONAL: PARALLEL "CONTENT" PIPELINE (docs → index) — often separate workflow
+# =============================================================================
+# Uncomment conceptually in your real repo as doc-ingestion.yml
+#
+# on:
+#   push:
+#     branches: [main]
+#     paths: ["docs/policies/**"]
+#
+# jobs:
+#   ingest_policies:
+#     steps:
+#       - validate_frontmatter   # owner, effective_date, jurisdiction
+#       - chunk_and_embed        # calls worker with signed URL to doc bundle
+#       - rebuild_index_alias    # swap alias only after eval passes on shadow index
+# =============================================================================
